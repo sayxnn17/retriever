@@ -241,12 +241,27 @@ def get_script(dataset):
 def get_data_upstream(search_url):
     """Basic method for getting upstream data"""
     try:
-        r = requests.get(search_url, allow_redirects=True, stream=True)
+        try:
+            r = requests.get(search_url, allow_redirects=True, stream=True)
+        except:
+            red = '\033[91m'
+            bold = '\033[1m'
+            end = '\033[0m'
+
+            print(f"\n{red}{bold}[!] Network Error: {end} {red} Repository cannot be accessed.{end}")
+            print(f"{red}Please check your Internet connection{end}\n")
+            sys.exit(1)
         if r.status_code == 404:
             return None
         return r
     except requests.exceptions.RequestException:
-        return None
+        red = '\033[91m'
+        bold = '\033[1m'
+        end = '\033[0m'
+
+        print(f"\n{red}{bold}[!] Network Error: {end} {red} Repository cannot be accessed.{end}")
+        print(f"{red}Please check your Internet connection{end}\n")
+        sys.exit(1)
 
 
 def get_script_upstream(dataset, repo=REPOSITORY):

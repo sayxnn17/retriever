@@ -1,5 +1,6 @@
 """Checks the repository for updates."""
 import os
+import sys
 import requests
 import imp
 from tqdm import tqdm
@@ -18,7 +19,13 @@ def _download_from_repository(filepath, newpath, repo=REPOSITORY):
                 f.write(chunk)
         r.close()
     except:
-        raise
+        red = '\033[91m'
+        bold = '\033[1m'
+        end = '\033[0m'
+
+        print(f"\n{red}{bold}[!] Network Error: {end} {red} Repository cannot be accessed.{end}")
+        print(f"{red}Please check your Internet connection{end}\n")
+        sys.exit(1)
 
 
 def check_for_updates(repo=REPOSITORY):
@@ -28,7 +35,17 @@ def check_for_updates(repo=REPOSITORY):
     """
     try:
         # open version.txt for current release branch and get script versions
-        version_file = requests.get(repo + "version.txt").text
+        try:
+            version_file = requests.get(repo + "version.txt").text
+        except Exception:
+            red = '\033[91m'
+            bold = '\033[1m'
+            end = '\033[0m'
+
+            print(f"\n{red}{bold}[!] Network Error: {end} {red} Repository cannot be accessed.{end}")
+            print(f"{red}Please check your Internet connection{end}\n")
+            sys.exit(1)
+
         version_file = version_file.splitlines()[1:]
 
         # read scripts from the repository and the checksums from the version.txt

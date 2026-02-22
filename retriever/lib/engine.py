@@ -11,6 +11,7 @@ from collections import OrderedDict
 from math import ceil
 from urllib.request import urlretrieve
 from urllib.error import HTTPError
+import sys
 
 import requests
 from requests.exceptions import InvalidSchema
@@ -495,7 +496,17 @@ class Engine():
                 url.split('/')[-1],
                 filename.partition('.')[0] +
                 "?$query=select%20count(*)%20as%20COLUMN_ALIAS_GUARD__count")
-            row_count = requests.get(row_count_url)
+            try:
+                row_count = requests.get(row_count_url)
+
+            except Exception:
+                red = '\033[91m'
+                bold = '\033[1m'
+                end = '\033[0m'
+
+                print(f"\n{red}{bold}[!] Network Error: {end} {red} Repository cannot be accessed.{end}")
+                print(f"{red}Please check your Internet connection{end}\n")
+                sys.exit(1)
             result = row_count.json()
             rows = result[0]["COLUMN_ALIAS_GUARD__count"]
 
@@ -510,7 +521,8 @@ class Engine():
     def download_response(self, url, path, progbar):
         """Returns True|None according to the download GET response"""
         try:
-            response = requests.get(
+            try:
+                response = requests.get(
                 url,
                 allow_redirects=True,
                 stream=True,
@@ -522,13 +534,27 @@ class Engine():
 
             if response.status_code == 404:
                 print("The data source or server may be redirected or not found")
+            
+            except:
+                red = '\033[91m'
+                bold = '\033[1m'
+                end = '\033[0m'
+
+                print(f"\n{red}{bold}[!] Network Error: {end} {red} Repository cannot be accessed.{end}")
+                print(f"{red}Please check your Internet connection{end}\n")
+                sys.exit(1)
 
         except InvalidSchema:
             try:
                 urlretrieve(url, path, reporthook=reporthook(progbar))
-            except HTTPError as e:
-                print("HTTPError :", e)
-                return None
+            except (HTTPError, URLError, ConnectionResetError) as e:
+                red = '\033[91m'
+                bold = '\033[1m'
+                end = '\033[0m'
+
+                print(f"\n{red}{bold}[!] Network Error: {end} {red} Repository cannot be accessed.{end}")
+                print(f"{red}Please check your Internet connection{end}\n")
+                sys.exit(1)
 
         self.use_cache = True
         progbar.close()

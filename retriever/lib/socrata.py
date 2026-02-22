@@ -13,7 +13,8 @@ from retriever.lib.templates import BasicTextTemplate
 
 def url_response(url, params):
     """Returns the GET response for the given url and params"""
-    return requests.get(
+    try:
+        response = requests.get(
         url,
         params,
         headers={
@@ -22,7 +23,17 @@ def url_response(url, params):
         },
         allow_redirects=True)
 
+        return response
 
+    except:
+            red = '\033[91m'
+            bold = '\033[1m'
+            end = '\033[0m'
+
+            print(f"\n{red}{bold}[!] Network Error: {end} {red} Repository cannot be accessed.{end}")
+            print(f"{red}Please check your Internet connection{end}\n")
+            sys.exit(1)
+    
 def socrata_autocomplete_search(dataset):
     """Returns the list of dataset names after autocompletion"""
     names = []
